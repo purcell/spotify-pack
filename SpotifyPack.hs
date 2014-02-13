@@ -10,6 +10,7 @@ import Control.Applicative ((<$>), (<*>))
 import Control.Monad (mzero)
 import Data.List (minimumBy)
 import Data.Maybe (fromMaybe)
+import System.Environment (getArgs)
 
 data Song = Song { label :: String, duration :: Float }
           deriving (Show, Eq, Ord)
@@ -79,3 +80,12 @@ totalDuration = sum . map duration
 *SpotifyPack> totalDuration `fmap` results "Happy" 600
 599.54297
 -}
+
+
+-- Compile with: ghc -main-is SpotifyPack -o SpotifyPack SpotifyPack.hs
+main :: IO ()
+main = do
+  (term:(limit:_)) <- getArgs
+  playlist <- results term $ read limit
+  print playlist
+  print $ totalDuration playlist

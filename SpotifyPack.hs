@@ -56,9 +56,11 @@ packAll things getCost limit = foldr packNext [] things
 
 -- Public interface for packing
 bestPack :: (Num b, Ord b) => (a -> b) -> b -> [a] -> [a]
-bestPack getCost limit things = items $ minimumBy compareByAvailable $ packAll things getCost limit
-    where compareByAvailable t1 t2 = compare (available t1) (available t2)
-
+bestPack getCost limit things = case packed of
+                                  [] -> []
+                                  _  -> items $ minimumBy compareByAvailable packed
+    where packed = packAll things getCost limit
+          compareByAvailable t1 t2 = compare (available t1) (available t2)
 
 
 

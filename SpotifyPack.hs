@@ -41,18 +41,18 @@ parseResponse resp =
 
 data Bin a b = Bin { items :: [a], available :: b } deriving Eq
 
-packItem :: Num b => Ord b => [Bin a b] -> b -> b -> a -> [Bin a b]
+packItem :: (Num b, Ord b) => [Bin a b] -> b -> b -> a -> [Bin a b]
 packItem []     binSize cost item = [ Bin { items = [item], available = binSize - cost } ]
 packItem (b:bs) binSize cost item
     | cost <= available b = (b { items = items b ++ [item], available = available b - cost }) : bs
     | otherwise           = b : packItem bs binSize cost item
 
-packAll :: Num b => Ord b => [a] -> (a -> b) -> b -> [Bin a b]
+packAll :: (Num b, Ord b) => [a] -> (a -> b) -> b -> [Bin a b]
 packAll things getCost limit = foldr packNext [] things
     where packNext item bins = packItem bins limit (getCost item) item
 
 -- Public interface for packing
-bestPack :: Num b => Ord b => (a -> b) -> b -> [a] -> [a]
+bestPack :: (Num b, Ord b) => (a -> b) -> b -> [a] -> [a]
 bestPack getCost limit things = items $ minimumBy compareByAvailable $ packAll things getCost limit
     where compareByAvailable t1 t2 = compare (available t1) (available t2)
 

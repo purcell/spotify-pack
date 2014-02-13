@@ -44,8 +44,8 @@ data Bin a b = Bin { items :: [a], available :: b } deriving Eq
 
 packItem :: (Num b, Ord b) => [Bin a b] -> b -> b -> a -> [Bin a b]
 packItem []     binSize cost item
-    | cost < binSize = [ Bin { items = [item], available = binSize - cost } ]
-    | otherwise      = []
+    | cost <= binSize = [ Bin { items = [item], available = binSize - cost } ]
+    | otherwise       = [] -- item is too big even for an empty bin
 packItem (b:bs) binSize cost item
     | cost <= available b = (b { items = items b ++ [item], available = available b - cost }) : bs
     | otherwise           = b : packItem bs binSize cost item

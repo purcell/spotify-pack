@@ -42,7 +42,9 @@ parseResponse resp =
 data Bin a b = Bin { items :: [a], available :: b } deriving Eq
 
 packItem :: (Num b, Ord b) => [Bin a b] -> b -> b -> a -> [Bin a b]
-packItem []     binSize cost item = [ Bin { items = [item], available = binSize - cost } ]
+packItem []     binSize cost item
+    | cost < binSize = [ Bin { items = [item], available = binSize - cost } ]
+    | otherwise      = []
 packItem (b:bs) binSize cost item
     | cost <= available b = (b { items = items b ++ [item], available = available b - cost }) : bs
     | otherwise           = b : packItem bs binSize cost item

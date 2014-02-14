@@ -12,7 +12,7 @@ import Data.List (minimumBy)
 import Data.Maybe (fromMaybe)
 import System.Environment (getArgs)
 
-data Song = Song { label :: String, duration :: Float }
+data Song = Song { name :: String, artists :: [String], duration :: Float }
           deriving (Show, Eq, Ord)
 
 searchURL :: String -> String
@@ -27,7 +27,9 @@ searchSpotify term = do
   return . parseResponse $ BSL.pack body
 
 instance FromJSON Song where
-  parseJSON (T.Object v) = Song <$> v .: "name" <*> v.: "length"
+  parseJSON (T.Object v) = Song <$> v .: "name"
+                                <*> (v .: "artists" >>= mapM (.: "name"))
+                                <*> v .: "length"
   parseJSON _ = mzero
 
 -- Helped by http://www.the-singleton.com/2012/02/parsing-nested-json-in-haskell-with-aeson/
@@ -78,9 +80,9 @@ totalDuration = sum . map duration
 
 {-
 *SpotifyPack> results "Happy" 600
-[Song {label = "Kiss The Stars", duration = 194.131},Song {label = "Chloe", duration = 198.386},Song {label = "Stay Happy There", duration = 207.026}]
-*SpotifyPack> totalDuration `fmap` results "Happy" 600
-599.54297
+[Song {name = "Happy Christmas (War Is Over)", artists = ["Maroon 5"], duration = 207.08},Song {name = "Devil's Work", artists = ["Miike Snow"], duration = 235.68},Song {name = "Happy", artists = ["Never Shout Never"], duration = 156.12}]
+*SpotifyPack> totalDuration <$> results "Happy" 600
+598.88
 -}
 
 

@@ -9,6 +9,7 @@ import qualified Data.ByteString.Lazy.Char8 as BSL
 import Control.Applicative ((<$>), (<*>))
 import Control.Monad (mzero)
 import Data.List (minimumBy)
+import Data.Function (on)
 import Data.Maybe (fromMaybe)
 import System.Environment (getArgs)
 
@@ -60,9 +61,8 @@ packAll things getCost limit = foldr packNext [] things
 bestPack :: (Num b, Ord b) => (a -> b) -> b -> [a] -> [a]
 bestPack getCost limit things = case packed of
                                   [] -> []
-                                  _  -> items $ minimumBy compareByAvailable packed
+                                  _  -> items $ minimumBy (compare `on` available) packed
     where packed = packAll things getCost limit
-          compareByAvailable t1 t2 = compare (available t1) (available t2)
 
 
 

@@ -45,13 +45,18 @@ parseResponse resp =
 
 data Bin a b = Bin { items :: [a], available :: b } deriving Eq
 
+addToBin :: Num b => Bin a b -> b -> a -> Bin a b
+addToBin bin cost item = bin { items = items bin ++ [item], available = available bin - cost }
+
 packItem :: (Num b, Ord b) => [Bin a b] -> b -> b -> a -> [Bin a b]
-packItem []     binSize cost item
-    | cost <= binSize = [ Bin { items = [item], available = binSize - cost } ]
-    | otherwise       = [] -- item is too big even for an empty bin
-packItem (b:bs) binSize cost item
-    | cost <= available b = (b { items = items b ++ [item], available = available b - cost }) : bs
-    | otherwise           = b : packItem bs binSize cost item
+packItem bins binSize cost item
+    | cost > binSize = bins -- The item will never fit a bin
+    | otherwise      = tooSmall ++ case rest of
+                                     []   -> [packIn (Bin [] binSize)]
+                                     b:bs -> packIn b : bs
+    where
+      (tooSmall, rest) = break ((cost <=) . available) bins
+      packIn b = addToBin b cost item
 
 packAll :: (Num b, Ord b) => [a] -> (a -> b) -> b -> [Bin a b]
 packAll things getCost limit = foldr packNext [] things
